@@ -1,0 +1,5 @@
+.env
+ticket.db
+
+*.db
+*.sqlite
