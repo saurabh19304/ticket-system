@@ -2,17 +2,16 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	// "ticket-system/internal/database"
+	 "ticket-system/internal/database"
 	"ticket-system/internal/routes"
-
 )
 
 func main() {
-	// database.ConnectDatabase()
+	 database.ConnectDatabase()
 
- router := gin.Default()
+	router := gin.Default()
 
- routes.RegisterRoutes(router)
+	routes.RegisterRoutes(router)
 
- router.Run(":8080")
+	router.Run(":8080")
 }
