@@ -10,9 +10,7 @@ import (
 	"ticket-system/internal/models"
 )
 
-
 func CreateTicket(c *gin.Context) {
-
 
 	var req dto.CreateTicketRequest
 
@@ -20,16 +18,16 @@ func CreateTicket(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
-return
+		return
 	}
 
 	userID := c.GetUint("userID")
 
 	ticket := models.Ticket{
-		Title: req.Title,
+		Title:       req.Title,
 		Description: req.Description,
-		Status: "open",
-		UserID: userID,
+		Status:      "open",
+		UserID:      userID,
 	}
 
 	if err := database.DB.Create(&ticket).Error; err != nil {
@@ -40,7 +38,6 @@ return
 	}
 
 	c.JSON(http.StatusCreated, ticket)
-
 
 }
 
@@ -77,10 +74,10 @@ func GetTicket(c *gin.Context) {
 	c.JSON(http.StatusOK, ticket)
 }
 
-func UpdateTicket(c *gin.Context) {
+func UpdateTicketStatus(c *gin.Context) {
 
 	var ticket models.Ticket
-	var req dto.UpdateTicketRequest
+	var req dto.UpdateStatusRequest
 
 	userID := c.GetUint("userID")
 
@@ -91,7 +88,9 @@ func UpdateTicket(c *gin.Context) {
 		return
 	}
 
-	if err := database.DB.Where("id = ? AND user_id = ?", c.Param("id"), userID).First(&ticket).Error; err != nil {
+	if err := database.DB.
+		Where("id = ? AND user_id = ?", c.Param("id"), userID).
+		First(&ticket).Error; err != nil {
 
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Ticket not found",
@@ -99,17 +98,32 @@ func UpdateTicket(c *gin.Context) {
 		return
 	}
 
-	if req.Title != "" {
-		ticket.Title = req.Title
+	switch ticket.Status {
+
+	case "open":
+		if req.Status != "in_progress" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Ticket can only move from open to in_progress",
+			})
+			return
+		}
+
+	case "in_progress":
+		if req.Status != "closed" {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": "Ticket can only move from in_progress to closed",
+			})
+			return
+		}
+
+	case "closed":
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Closed ticket cannot be reopened",
+		})
+		return
 	}
 
-	if req.Description != "" {
-		ticket.Description = req.Description
-	}
-
-	if req.Status != "" {
-		ticket.Status = req.Status
-	}
+	ticket.Status = req.Status
 
 	if err := database.DB.Save(&ticket).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

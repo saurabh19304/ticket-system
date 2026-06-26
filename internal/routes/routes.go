@@ -9,18 +9,16 @@ import (
 
 func RegisterRoutes(router *gin.Engine) {
 
-	
 	router.GET("/health", handlers.HealthCheck)
-	router.POST("/register", handlers.Register)
-	router.POST("/login", handlers.Login)
+	router.POST("/auth/register", handlers.Register)
+	router.POST("/auth/login", handlers.Login)
 
-	
 	protected := router.Group("/")
 	protected.Use(middleware.AuthMiddleware())
 
 	protected.POST("/tickets", handlers.CreateTicket)
 	protected.GET("/tickets", handlers.GetTickets)
-  protected.GET("/tickets/:id",  handlers.GetTicket)
-  protected.PUT("/tickets/:id", handlers.UpdateTicket)
-  protected.DELETE("/tickets/:id", handlers.DeleteTicket)
+	protected.PATCH("/tickets/:id/status", handlers.UpdateTicketStatus)
+	protected.PATCH("/tickets/:id", handlers.UpdateTicket)
+	protected.DELETE("/tickets/:id", handlers.DeleteTicket)
 }
