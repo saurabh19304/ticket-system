@@ -9,6 +9,14 @@ import (
 
 func RegisterRoutes(router *gin.Engine) {
 
+
+	router.GET("/", func(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Ticket Management API is running",
+		"health": "/health",
+	})
+})
+
 	router.GET("/health", handlers.HealthCheck)
 	router.POST("/auth/register", handlers.Register)
 	router.POST("/auth/login", handlers.Login)
