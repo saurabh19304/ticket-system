@@ -10,7 +10,6 @@ import (
 	"ticket-system/internal/utils"
 )
 
-
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
@@ -22,10 +21,10 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		tokenString := strings.TrimPrefix(authHeader,      "Bearer ") 
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token)(interface{}, error){
-			return utils.JwtSecret, nil 
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return utils.JwtSecret, nil
 		})
 
 		if err != nil || !token.Valid {
@@ -35,20 +34,19 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-			claims, ok := token.Claims.(jwt.MapClaims)
+		claims, ok := token.Claims.(jwt.MapClaims)
 
-	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error": "Invalid token claims",
-		})
-		c.Abort()
-		return 
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"error": "Invalid token claims",
+			})
+			c.Abort()
+			return
+		}
+		userID := uint(claims["user_id"].(float64))
+
+		c.Set("userID", userID)
+		c.Next()
 	}
-	userID := uint(claims["user_id"].(float64))
-
-	c.Set("userID", userID)
-	c.Next()
-	}
-
 
 }

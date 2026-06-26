@@ -13,7 +13,6 @@ import (
 	"ticket-system/internal/utils"
 )
 
-
 func Register(c *gin.Context) {
 
 	var req dto.RegisterRequest
@@ -23,39 +22,37 @@ func Register(c *gin.Context) {
 			"error": err.Error(),
 		})
 		return
-}
+	}
 
-hashedPassword, err := bcrypt.GenerateFromPassword(
-	[]byte(req.Password), 
-	bcrypt.DefaultCost,
-)
+	hashedPassword, err := bcrypt.GenerateFromPassword(
+		[]byte(req.Password),
+		bcrypt.DefaultCost,
+	)
 
-if err != nil {
-	c.JSON(http.StatusInternalServerError, gin.H{
-		"error": "Failed to hash password",
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to hash password",
+		})
+		return
+	}
+
+	user := models.User{
+		Email:    req.Email,
+		Password: string(hashedPassword),
+	}
+
+	if err := database.DB.Create(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "user alreafdy exists",
+		})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"message": "User registered successfully",
 	})
-	return
-}
-
-user := models.User{
-	Email: req.Email,
-	Password: string(hashedPassword),
-}
-
-if err := database.DB.Create(&user).Error; err != nil {
-	c.JSON(http.StatusBadRequest, gin.H{
-		"error": "user alreafdy exists",
-	})
-	return
-}
-
-c.JSON(http.StatusCreated, gin.H{
-	"message": "User registered successfully",
-})
-
 
 }
-
 
 func Login(c *gin.Context) {
 
@@ -68,7 +65,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-
 	var user models.User
 
 	if err := database.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
@@ -78,30 +74,28 @@ func Login(c *gin.Context) {
 		return
 	}
 
-err := bcrypt.CompareHashAndPassword(
-	[]byte(user.Password),
-	[]byte(req.Password),
-)
+	err := bcrypt.CompareHashAndPassword(
+		[]byte(user.Password),
+		[]byte(req.Password),
+	)
 
-if err != nil {
-	c.JSON(http.StatusUnauthorized, gin.H{
-		"error": "invalid email or password",
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "invalid email or password",
+		})
+		return
+	}
+
+	token, err := utils.GenerateToken(user.ID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to genrate token",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"token": token,
 	})
-	return
-}
-
-token, err := utils.GenerateToken(user.ID)
-
-
-if err != nil {
-	c.JSON(http.StatusInternalServerError, gin.H{
-"error":"Failed to genrate token",
-	})
-	return
-}
-
-
-c.JSON(http.StatusOK, gin.H{
-"token": token,
-})
 }
