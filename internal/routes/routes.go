@@ -18,7 +18,7 @@ func RegisterRoutes(router *gin.Engine) {
 
 	protected.POST("/tickets", handlers.CreateTicket)
 	protected.GET("/tickets", handlers.GetTickets)
+	protected.GET("/tickets/:id", handlers.GetTicket)
 	protected.PATCH("/tickets/:id/status", handlers.UpdateTicketStatus)
-	protected.PATCH("/tickets/:id", handlers.UpdateTicket)
 	protected.DELETE("/tickets/:id", handlers.DeleteTicket)
 }
