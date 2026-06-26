@@ -120,3 +120,29 @@ func UpdateTicket(c *gin.Context) {
 
 	c.JSON(http.StatusOK, ticket)
 }
+
+func DeleteTicket(c *gin.Context) {
+
+	var ticket models.Ticket
+
+	userID := c.GetUint("userID")
+
+	if err := database.DB.Where("id = ? AND user_id = ?", c.Param("id"), userID).First(&ticket).Error; err != nil {
+
+		c.JSON(http.StatusNotFound, gin.H{
+			"error": "Ticket not found",
+		})
+		return
+	}
+
+	if err := database.DB.Delete(&ticket).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to delete ticket",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Ticket deleted successfully",
+	})
+}

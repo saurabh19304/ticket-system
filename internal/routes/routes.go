@@ -19,4 +19,8 @@ func RegisterRoutes(router *gin.Engine) {
 	protected.Use(middleware.AuthMiddleware())
 
 	protected.POST("/tickets", handlers.CreateTicket)
+	protected.GET("/tickets", handlers.GetTickets)
+  protected.GET("/tickets/:id",  handlers.GetTicket)
+  protected.PUT("/tickets/:id", handlers.UpdateTicket)
+  protected.DELETE("/tickets/:id", handlers.DeleteTicket)
 }
