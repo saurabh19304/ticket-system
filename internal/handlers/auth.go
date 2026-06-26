@@ -10,6 +10,7 @@ import (
 	"ticket-system/internal/database"
 	"ticket-system/internal/dto"
 	"ticket-system/internal/models"
+	"ticket-system/internal/utils"
 )
 
 
@@ -53,4 +54,54 @@ c.JSON(http.StatusCreated, gin.H{
 })
 
 
+}
+
+
+func Login(c *gin.Context) {
+
+	var req dto.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+
+	var user models.User
+
+	if err := database.DB.Where("email = ?", req.Email).First(&user).Error; err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": "Invalid email or password",
+		})
+		return
+	}
+
+err := bcrypt.CompareHashAndPassword(
+	[]byte(user.Password),
+	[]byte(req.Password),
+)
+
+if err != nil {
+	c.JSON(http.StatusUnauthorized, gin.H{
+		"error": "invalid email or password",
+	})
+	return
+}
+
+token, err := utils.GenerateToken(user.ID)
+
+
+if err != nil {
+	c.JSON(http.StatusInternalServerError, gin.H{
+"error":"Failed to genrate token",
+	})
+	return
+}
+
+
+c.JSON(http.StatusOK, gin.H{
+"token": token,
+})
 }
