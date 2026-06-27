@@ -1,8 +1,6 @@
 package routes
 
 import (
-	 "net/http"
-
 	"github.com/gin-gonic/gin"
 
 	"ticket-system/internal/handlers"
@@ -12,12 +10,8 @@ import (
 func RegisterRoutes(router *gin.Engine) {
 
 
-	router.GET("/", func(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"message": "Ticket Management API is running",
-		"health": "/health",
-	})
-})
+	router.StaticFile("/", "./frontend/index.html")
+	router.StaticFile("/app.js", "./frontend/app.js")
 
 	router.GET("/health", handlers.HealthCheck)
 	router.POST("/auth/register", handlers.Register)

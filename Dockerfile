@@ -14,6 +14,7 @@ FROM alpine:3.22
 WORKDIR /app
 
 COPY --from=builder /app/server .
+COPY --from=builder /app/frontend ./frontend
 
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
