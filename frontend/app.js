@@ -5,7 +5,9 @@
 
 // --- Global Application State ---
 const state = {
-  apiUrl: localStorage.getItem('ticket_system_api_url') || 'https://ticket-system-0e68.onrender.com',
+  apiUrl: (window.location.origin && window.location.origin !== 'null' && window.location.protocol.startsWith('http')) 
+    ? window.location.origin 
+    : 'https://ticket-system-0e68.onrender.com',
   token: localStorage.getItem('ticket_system_token') || null,
   userEmail: localStorage.getItem('ticket_system_user_email') || '',
   tickets: [],
@@ -15,15 +17,10 @@ const state = {
 
 // --- DOM Elements ---
 const elements = {
-  // Navigation & settings
+  // Navigation
   apiStatusDot: document.getElementById('api-status-dot'),
   apiStatusPulse: document.getElementById('api-status-pulse'),
   apiStatusText: document.getElementById('api-status-text'),
-  btnSettingsToggle: document.getElementById('btn-settings-toggle'),
-  btnSettingsClose: document.getElementById('btn-settings-close'),
-  settingsPanel: document.getElementById('settings-panel'),
-  inputApiUrl: document.getElementById('input-api-url'),
-  btnSaveApiUrl: document.getElementById('btn-save-api-url'),
   headerUserSection: document.getElementById('header-user-section'),
   userEmailDisplay: document.getElementById('user-email-display'),
   btnLogout: document.getElementById('btn-logout'),
@@ -554,35 +551,7 @@ elements.btnLogout.addEventListener('click', () => {
   updateView();
 });
 
-// Settings Toggle Panel
-elements.btnSettingsToggle.addEventListener('click', () => {
-  elements.settingsPanel.classList.toggle('hidden');
-});
-
-elements.btnSettingsClose.addEventListener('click', () => {
-  elements.settingsPanel.classList.add('hidden');
-});
-
-elements.btnSaveApiUrl.addEventListener('click', () => {
-  let url = elements.inputApiUrl.value.trim();
-  if (!url) return;
-
-  // Clean trailing slash if present
-  if (url.endsWith('/')) {
-    url = url.slice(0, -1);
-  }
-
-  state.apiUrl = url;
-  localStorage.setItem('ticket_system_api_url', url);
-  showToast(`API Base URL saved: ${url}`, 'success');
-  elements.settingsPanel.classList.add('hidden');
-  
-  // Re-check health and reload view
-  checkApiHealth();
-  if (state.token) {
-    fetchTickets();
-  }
-});
+// Settings panel event listeners removed for security
 
 // Filter Tabs Click Handlers
 elements.filterTabs.forEach(tab => {
@@ -600,8 +569,7 @@ elements.filterTabs.forEach(tab => {
 
 // --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-  // Setup inputs
-  elements.inputApiUrl.value = state.apiUrl;
+  // Setup inputs removed
 
   // Initialize Lucide Icons
   if (window.lucide) {

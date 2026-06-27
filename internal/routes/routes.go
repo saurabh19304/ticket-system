@@ -12,6 +12,7 @@ func RegisterRoutes(router *gin.Engine) {
 
 	router.StaticFile("/", "./frontend/index.html")
 	router.StaticFile("/app.js", "./frontend/app.js")
+	router.StaticFile("/logo.png", "./frontend/logo.png")
 
 	router.GET("/health", handlers.HealthCheck)
 	router.POST("/auth/register", handlers.Register)
